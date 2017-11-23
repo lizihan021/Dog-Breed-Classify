@@ -4,7 +4,6 @@ from keras.models import Sequential
 from keras.layers import Input, Conv2D, Dense, Dropout, MaxPooling2D, Flatten
 from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
-from keras.utils.data_utils import get_file
 from keras.utils import plot_model
 from keras import backend as K
 from sklearn.model_selection import train_test_split
@@ -17,6 +16,8 @@ DROPOUT_DENSE = get('cnn.dropout_dense')
 BATCH_SIZE = get('cnn.batch_size')
 OPTIMIZER = get('cnn.optimizer')
 MODEL_WEIGHTS_FILE = get('cnn.weights_file')
+VALIDATION_SPLIT = get('cnn.validation_split')
+CNN_EPOCHS = get('cnn.cnn_epochs')
 # define CNN
 
 model = Sequential()
@@ -65,11 +66,16 @@ model.compile(loss='mean_squared_error',
 
 plot_model(model, to_file='model.png')
 
+callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_acc', save_best_only=True)]
 model.fit(x_train, y_train,
           batch_size=batch_size,
-          epochs=epochs,
+          epochs=CNN_EPOCHS,
           verbose=2,
-          validation_data=(x_test, y_test))
+          validation_split=VALIDATION_SPLIT,
+          callbacks=callbacks)
+
+max_val_acc, idx = max((val, idx) for (idx, val) in enumerate(history.history['val_acc']))
+print('Maximum validation accuracy = {0:.4f} (epoch {1:d})'.format(max_val_acc, idx+1))
 
 score = model.evaluate(x_test, y_test, verbose=0)
 
