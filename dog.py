@@ -19,8 +19,8 @@ class DogsDataset:
         Reads in the necessary data from disk and prepares data for training.
         """
         # Load in all the data we need from disk
-        self.training_metadata = get('training_file')
-        self.trainX, self.trainY = self._load_data('train')
+        # self.training_metadata = get('training_file')
+        # self.trainX, self.trainY = self._load_data('train')
         self.testing_metadata = get('testing_file')
         self.testX = self._load_data('test')
 
@@ -43,21 +43,30 @@ class DogsDataset:
         X, y = [], []
         with open(metadata) as f:
             lines = f.read().splitlines()
+        # idx = 0
         for line in lines:
+            # if idx > 3:
+            #     break
+            # idx += 1
             image = imread(os.path.join(get('image_path'), line))
             image = imresize(image,(get('image_dim'), get('image_dim')))
+            print(np.shape(image))
             X.append(image)
 
             input = re.split('/', line)
             input = re.split('.', input[0])
-            y.append(input[1])
-        return np.array(X), np.array(y).astype(int)
+            y.append(input[0])
+        return np.array(X), np.array(y)
 
     def _get_images(self, metadata):
         X = []
         with open(metadata) as f:
             lines = f.read().splitlines()
+        # idx = 0
         for line in lines:
+            # if idx > 100:
+            #     break
+            # idx += 1
             image = imread(os.path.join(get('image_path'), line))
             image = imresize(image,(get('image_dim'), get('image_dim')))
             X.append(image)
@@ -66,6 +75,5 @@ class DogsDataset:
 
 if __name__ == '__main__':
     dogs = DogsDataset(num_classes=10, _all=True)
-    print("Train:\t", len(dogs.trainX))
-    print("Validation:\t", len(dogs.validX))
+    # print("Train:\t", len(dogs.trainX))
     print("Test:\t", len(dogs.testX))
