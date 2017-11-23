@@ -2,5 +2,11 @@
     "training_file": "CU_Dogs/training.txt",
     "testing_file": "CU_Dogs/testing.txt",
     "image_path": "CU_Dogs/dogImages",
-    "image_dim": 128
+    "image_dim": 128,
+    "cnn": {
+    	"dropout_cnn": 0.3,
+    	"dropout_dense": 0.5,
+    	"batch_size": 64,
+    	"optimizer": "adam",
+    },
 }

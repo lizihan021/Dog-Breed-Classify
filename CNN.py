@@ -10,15 +10,16 @@ from keras.utils.data_utils import get_file
 from keras.utils import plot_model
 from keras import backend as K
 from sklearn.model_selection import train_test_split
+from utils import get
 
 # Initialize global variables
 CU_DOG_DATASETS_DIR = '../CU_Dogs'
 
-IMAGE_SIZE = 128
-DROPOUT_CNN = 0.3
-DROPOUT_DENSE = 0.5
-BATCH_SIZE = 64
-OPTIMIZER = 'adam'
+IMAGE_SIZE = get('image_dim')
+DROPOUT_CNN = get('cnn.dropout_cnn')
+DROPOUT_DENSE = get('cnn.dropout_dense')
+BATCH_SIZE = get('cnn.batch_size')
+OPTIMIZER = get('cnn.optimizer')
 # define CNN
 
 model = Sequential()
@@ -67,13 +68,13 @@ model.compile(loss='mean_squared_error',
 
 plot_model(model, to_file='model.png')
 
-# model.fit(x_train, y_train,
-#           batch_size=batch_size,
-#           epochs=epochs,
-#           verbose=2,
-#           validation_data=(x_test, y_test))
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=2,
+          validation_data=(x_test, y_test))
 
-# score = model.evaluate(x_test, y_test, verbose=0)
+score = model.evaluate(x_test, y_test, verbose=0)
 
-# print('Test loss:', score[0])
-# print('Test accuracy:', score[1])
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
