@@ -68,7 +68,7 @@ plot_model(model, to_file='model.png')
 
 dogs = DogsDataset()
 x_train, y_train = dogs._load_data('train')
-x_test, y_test = 
+x_test, y_test = dogs._load_data('train')
 
 callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_acc', save_best_only=True)]
 model.fit(x_train, y_train,
