@@ -17,29 +17,31 @@ class DogsDataset:
     def __init__(self):
         # Load in all the data we need from disk
 
-        self.test_metadata = get('testing_file')
-        self.train_metadata = get('training_file')
+        self.train_path = get('testing_file')
+        self.test_path = get('training_file')
 
     def _load_data(self, partition='train'):
         """
         Loads a single data partition from file.
         """
         if partition == 'train':
-            metadata = self.train_metadata
+            path = self.train_path
         else:
-            metadata = self.test_metadata
+            path = self.test_path
         print("loading %s..." % partition)
         X, y = [], []
         point_location_vector = []
-        with open(metadata) as f:
+        with open(path) as f:
             lines = f.read().splitlines()
         new_pos = np.asarray([[128-1], [128-1]])
         for line in lines[:10]:
             image = imread(os.path.join(get('image_path'), line))
             row, col, _ = image.shape
             image = imresize(image,(get('image_dim'), get('image_dim')))
+
             # image
             X.append(image)
+
             # feature vector
             filename = line.rpartition('.')[0] + '.txt'
             f = open(get('point_location_path') + '/' + filename, 'r')
@@ -56,6 +58,7 @@ class DogsDataset:
             one_feature = np.dot(trans_matrix, one_feature)
             one_feature = np.reshape(one_feature, 16, order='F')
             point_location_vector.append(one_feature)
+            
             # dog class
             y.append(re.split('.', re.split('/', line)[0])[0])
         return np.array(X), np.array(y), np.array(point_location_vector)

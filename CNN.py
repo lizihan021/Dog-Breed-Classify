@@ -7,7 +7,7 @@ from keras.callbacks import Callback, ModelCheckpoint
 from keras.utils import plot_model
 from keras import backend as K
 from utils import get
-from dogs import DogsDataset
+from dog import DogsDataset
 
 # Initialize global variables
 IMAGE_SIZE = get('image_dim')
@@ -67,12 +67,12 @@ model.compile(loss='mean_squared_error',
 plot_model(model, to_file='model.png')
 
 dogs = DogsDataset()
-x_train, y_train = dogs._load_data('train')
-x_test, y_test = dogs._load_data('train')
+x_train, label_train, y_train = dogs._load_data('train')
+x_test, lable_test, y_test = dogs._load_data('train')
 
 callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_acc', save_best_only=True)]
 model.fit(x_train, y_train,
-          batch_size=batch_size,
+          batch_size=BATCH_SIZE,
           epochs=CNN_EPOCHS,
           verbose=2,
           validation_split=VALIDATION_SPLIT,
