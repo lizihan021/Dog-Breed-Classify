@@ -8,5 +8,6 @@
     	"dropout_dense": 0.5,
     	"batch_size": 64,
     	"optimizer": "adam",
+        "weights_file": "weights/cnn_weights.h5"
     },
 }

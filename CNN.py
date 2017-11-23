@@ -1,8 +1,6 @@
 from __future__ import print_function
 import numpy as np
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Model, Sequential
+from keras.models import Sequential
 from keras.layers import Input, Conv2D, Dense, Dropout, MaxPooling2D, Flatten
 from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
@@ -13,13 +11,12 @@ from sklearn.model_selection import train_test_split
 from utils import get
 
 # Initialize global variables
-CU_DOG_DATASETS_DIR = '../CU_Dogs'
-
 IMAGE_SIZE = get('image_dim')
 DROPOUT_CNN = get('cnn.dropout_cnn')
 DROPOUT_DENSE = get('cnn.dropout_dense')
 BATCH_SIZE = get('cnn.batch_size')
 OPTIMIZER = get('cnn.optimizer')
+MODEL_WEIGHTS_FILE = get('cnn.weights_file')
 # define CNN
 
 model = Sequential()
