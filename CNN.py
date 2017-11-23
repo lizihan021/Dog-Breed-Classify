@@ -6,8 +6,8 @@ from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
 from keras.utils import plot_model
 from keras import backend as K
-from sklearn.model_selection import train_test_split
 from utils import get
+from dogs import DogsDataset
 
 # Initialize global variables
 IMAGE_SIZE = get('image_dim')
@@ -18,8 +18,8 @@ OPTIMIZER = get('cnn.optimizer')
 MODEL_WEIGHTS_FILE = get('cnn.weights_file')
 VALIDATION_SPLIT = get('cnn.validation_split')
 CNN_EPOCHS = get('cnn.cnn_epochs')
-# define CNN
 
+# define CNN
 model = Sequential()
 # (128,128,3)
 model.add(Conv2D(16, kernel_size=(7, 7),
@@ -65,6 +65,10 @@ model.compile(loss='mean_squared_error',
               metrics=['accuracy'])
 
 plot_model(model, to_file='model.png')
+
+dogs = DogsDataset()
+x_train, y_train = dogs._load_data('train')
+x_test, y_test = 
 
 callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_acc', save_best_only=True)]
 model.fit(x_train, y_train,

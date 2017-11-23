@@ -19,8 +19,6 @@ class DogsDataset:
 
         self.test_metadata = get('testing_file')
         self.train_metadata = get('training_file')
-        self.trainX, self.trainY = self._load_data('train')
-        self.testX, self.testY = self._load_data('test')
 
     def _load_data(self, partition='train'):
         """
@@ -42,9 +40,3 @@ class DogsDataset:
             # dog class
             y.append(re.split('.', re.split('/', line)[0])[0])
         return np.array(X), np.array(y)
-        
-
-if __name__ == '__main__':
-    dogs = DogsDataset()
-    print("Train:\t", len(dogs.trainX))
-    print("Test:\t", len(dogs.testX))
