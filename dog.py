@@ -32,8 +32,11 @@ class DogsDataset:
         Y = None
         if partition == 'test':
             X = self._get_images(self.testing_metadata)
+            return X
         else:
             X, Y = self._get_images_and_labels(self.training_metadata)
+            return X, Y
+
 
     def _get_images_and_labels(self, metadata):
         """
@@ -43,11 +46,7 @@ class DogsDataset:
         X, y = [], []
         with open(metadata) as f:
             lines = f.read().splitlines()
-        # idx = 0
-        for line in lines:
-            # if idx > 3:
-            #     break
-            # idx += 1
+        for line in lines[:10]:
             image = imread(os.path.join(get('image_path'), line))
             image = imresize(image,(get('image_dim'), get('image_dim')))
             print(np.shape(image))
@@ -62,11 +61,7 @@ class DogsDataset:
         X = []
         with open(metadata) as f:
             lines = f.read().splitlines()
-        # idx = 0
-        for line in lines:
-            # if idx > 100:
-            #     break
-            # idx += 1
+        for line in lines[:10]:
             image = imread(os.path.join(get('image_path'), line))
             image = imresize(image,(get('image_dim'), get('image_dim')))
             X.append(image)

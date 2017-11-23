@@ -2,6 +2,7 @@
     "training_file": "CU_Dogs/training.txt",
     "testing_file": "CU_Dogs/testing.txt",
     "image_path": "CU_Dogs/dogImages",
+    "point_location_path": "CU_Dogs/dogParts",
     "image_dim": 128,
     "cnn": {
     	"dropout_cnn": 0.3,
