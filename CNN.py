@@ -92,20 +92,30 @@ print('Test accuracy:', score[1])
 def get_sift(img, kp = [], mode = "gray"):
 	if mode == "gray":
 		img = denormalize_image(img)
+		img = np.array(img*255, dtype="uint8")
 		gray= cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-		sift = cv2.SIFT()
-		kp = sift.detect(gray,None)
+		sift = cv2.xfeatures2d.SIFT_create()
 		print(kp)
 		kp,des = sift.compute(gray,kp)
-		print(kp)
-		img=cv2.drawKeypoints(gray,kp)
+		print(des.shape)
+		print(des)
+		img=cv2.drawKeypoints(gray,kp, None)
 		cv2.imshow('result', img), cv2.waitKey(0)
+		cv2.destroyWindow("result")
 
 	elif mode == "color":
 		return 1
-	
-get_sift(x_train[3])
 
-visualize_feature_points(x_train[3], features_train[3], normalized=True)
+def generate_kp(features_line):
+	kp = []
+	for i in range(int(len(features_line)/2)):
+		tmp_x = int(features_line[2*i])
+		tmp_y = int(features_line[2*i+1])
+		kp.append( cv2.KeyPoint(tmp_x, tmp_y, 16) ) ###
+	return kp
+
+get_sift(x_train[2], generate_kp(features_train[2]))
+
+visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
