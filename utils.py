@@ -5,7 +5,6 @@ Utility functions
 """
 import os
 import numpy as np
-# import tensorflow as tf
 import matplotlib.pyplot as plt
 
 def get(attr):
@@ -21,16 +20,26 @@ def get(attr):
         node = node[part]
     return node
 
-def visualize_feature_points(image, features):
+def visualize_feature_points(image, features, normalized = False):
     """
     Plot feature points on the image, including
     Right eye, Left eye, Nose, Right ear tip, Right ear base (inner base),
     Head top, Left ear base (inner base), Left ear tip.
     """
     # im = plt.imread(image_name)
-    implot = plt.imshow(image)
+    if normalized:
+        implot = plt.imshow(denormalize_image(image))
+    else:
+        implot = plt.imshow(image)
     plt.scatter(x=features[::2], y=features[1::2], c='r', s=100)
     plt.show()
+
+def denormalize_image(image):
+    """ Rescale the image's color space from (min, max) to (0, 1) """
+    ptp = np.max(image, axis=(0,1)) - np.min(image, axis=(0,1))
+    return (image - np.min(image, axis=(0,1))) / ptp
+
+
 
 # if __name__ == '__main__':
 #     image_name = "CU_Dogs/dogImages/006.American_eskimo_dog/American_eskimo_dog_00394.jpg"
