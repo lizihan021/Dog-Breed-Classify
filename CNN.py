@@ -5,7 +5,7 @@ from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
 from keras.utils import plot_model
 from keras import backend as K
-from utils import get
+from utils import get, visualize_feature_points
 from dog import DogsDataset
 
 # Initialize global variables
