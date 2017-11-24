@@ -8,7 +8,7 @@ Dogs Dataset
 import numpy as np
 from scipy.misc import imread, imresize
 import os
-from utils import get, visualize_feature_points
+from utils import get
 import re
 
 class DogsDataset:
@@ -60,8 +60,7 @@ class DogsDataset:
 
         X = self._normalize(np.array(X), partition)
         # example of visualization
-        visualize_feature_points(X[3], point_location_vector[3], normalized=True)
-        return np.array(X), np.array(y), point_location_vector
+        return np.array(X), np.array(y), np.array(point_location_vector)
 
     def _normalize(self, X, is_train):
         # this will normalize the data:

@@ -5,8 +5,9 @@ from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
 from keras.utils import plot_model
 from keras import backend as K
-from utils import get, visualize_feature_points
+from utils import *
 from dog import DogsDataset
+from os.path import exists
 import cv2
 
 # Initialize global variables
@@ -68,41 +69,43 @@ plot_model(model, to_file='model.png')
 
 # define input data:
 dogs = DogsDataset()
-# must first load train set !!!
 x_train, label_train, features_train = dogs.trainX, dogs.trainY, dogs.train_features
 x_test, lable_test, features_test = dogs.testX, dogs.testY, dogs.test_features
 
-callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
-history = model.fit(x_train, features_train,
-          batch_size=BATCH_SIZE,
-          epochs=CNN_EPOCHS,
-          verbose=2,
-          validation_split=VALIDATION_SPLIT,
-          callbacks=callbacks)
+if not exists(MODEL_WEIGHTS_FILE):
+	callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
+	history = model.fit(x_train, features_train,
+	          batch_size=BATCH_SIZE,
+	          epochs=CNN_EPOCHS,
+	          verbose=2,
+	          validation_split=VALIDATION_SPLIT,
+	          callbacks=callbacks)
 
-max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
-print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
+	max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
+	print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 
+model.load_weights(MODEL_WEIGHTS_FILE)
 score = model.evaluate(x_test, features_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
-def get_sift(img, kp, mode = "gray"):
+def get_sift(img, kp = [], mode = "gray"):
 	if mode == "gray":
-		return 0
+		img = denormalize_image(img)
+		gray= cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+		sift = cv2.SIFT()
+		kp = sift.detect(gray,None)
+		print(kp)
+		kp,des = sift.compute(gray,kp)
+		print(kp)
+		img=cv2.drawKeypoints(gray,kp)
+		cv2.imshow('result', img), cv2.waitKey(0)
+
 	elif mode == "color":
 		return 1
-	gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	
+get_sift(x_train[3])
 
-	sift = cv2.SIFT()
-	kp = sift.detect(gray,None)
-	print(kp)
-	kp,des = sift.compute(gray,kp)
-	print(kp)
-	img=cv2.drawKeypoints(gray,kp)
-	cv2.imwrite('sift_keypoints.jpg',img)
-
-
-
+visualize_feature_points(x_train[3], features_train[3], normalized=True)
 
 exit(0)
