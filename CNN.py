@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Input, Conv2D, Dense, Dropout, MaxPooling2D, Flatten
@@ -66,22 +65,24 @@ model.compile(loss='mean_squared_error',
 
 plot_model(model, to_file='model.png')
 
+# define input data:
 dogs = DogsDataset()
 x_train, label_train, y_train = dogs._load_data('train')
-x_test, lable_test, y_test = dogs._load_data('train')
+x_test, lable_test, y_test = dogs._load_data('test')
 
-callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_acc', save_best_only=True)]
-model.fit(x_train, y_train,
+callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
+history = model.fit(x_train, y_train,
           batch_size=BATCH_SIZE,
           epochs=CNN_EPOCHS,
           verbose=2,
           validation_split=VALIDATION_SPLIT,
           callbacks=callbacks)
 
-max_val_acc, idx = max((val, idx) for (idx, val) in enumerate(history.history['val_acc']))
-print('Maximum validation accuracy = {0:.4f} (epoch {1:d})'.format(max_val_acc, idx+1))
+max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
+print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 
 score = model.evaluate(x_test, y_test, verbose=0)
-
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+exit(0)
