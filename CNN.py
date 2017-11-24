@@ -7,6 +7,7 @@ from keras.utils import plot_model
 from keras import backend as K
 from utils import get
 from dog import DogsDataset
+import cv2
 
 # Initialize global variables
 IMAGE_SIZE = get('image_dim')
@@ -84,5 +85,23 @@ print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+def get_sift(img, kp, mode = "gray"):
+	if mode == "gray":
+		return 0
+	elif mode == "color":
+		return 1
+	gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+	sift = cv2.SIFT()
+	kp = sift.detect(gray,None)
+	print(kp)
+	kp,des = sift.compute(gray,kp)
+	print(kp)
+	img=cv2.drawKeypoints(gray,kp)
+	cv2.imwrite('sift_keypoints.jpg',img)
+
+
+
 
 exit(0)
