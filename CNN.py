@@ -99,7 +99,7 @@ def get_sift(img, kp = [], mode = "gray"):
 		kp,des = sift.compute(gray,kp)
 		print(des.shape)
 		print(des)
-		img=cv2.drawKeypoints(gray,kp, None)
+		img=cv2.drawKeypoints(gray, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 		cv2.imshow('result', img), cv2.waitKey(0)
 		cv2.destroyWindow("result")
 
@@ -108,13 +108,36 @@ def get_sift(img, kp = [], mode = "gray"):
 
 def generate_kp(features_line):
 	kp = []
-	for i in range(int(len(features_line)/2)):
-		tmp_x = int(features_line[2*i])
-		tmp_y = int(features_line[2*i+1])
-		kp.append( cv2.KeyPoint(tmp_x, tmp_y, 16) ) ###
-	return kp
+	left_eye = np.array([features_line[0], features_line[1]])
+	right_eye = np.array([features_line[2], features_line[3]])
+	nose = np.array([features_line[4], features_line[5]])
+	face_line = left_eye - right_eye
+	kp_scale = np.linalg.norm(face_line)/2
+	kp_angle = np.degrees(np.arctan2(face_line[1], face_line[0]))
+	for i in range(8):
+		tmp_x = features_line[2*i]
+		tmp_y = features_line[2*i+1]
+		kp.append(cv2.KeyPoint(tmp_x, tmp_y, _size=kp_scale, _angle=kp_angle))
 
-get_sift(x_train[2], generate_kp(features_train[2]))
+	# mask
+	center = (left_eye + right_eye + nose)/3
+	face_scale = np.linalg.norm(face_line)*1.5
+	mask = np.zeros((128,128), dtype="uint8")
+
+	col_min = np.maximum(int(center[0]-face_scale), 0)
+	col_max = np.minimum(int(center[0]+face_scale), 127)
+	row_min = np.maximum(int(center[1]-face_scale), 0)
+	row_max = np.minimum(int(center[1]+face_scale), 127)
+
+	mask[row_min:row_max,col_min:col_max] = 1
+	return kp, mask
+
+kp, mask = generate_kp(features_train[5])
+img = denormalize_image(x_train[5])
+img = np.array(img*255, dtype="uint8")
+gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+cv2.imshow('result', mask*gray), cv2.waitKey(0)
+get_sift(x_train[5], kp)
 
 visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
