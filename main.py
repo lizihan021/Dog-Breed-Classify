@@ -33,7 +33,7 @@ if not exists(MODEL_WEIGHTS_FILE):
 	history = model.fit(x_train, features_train,
 	          batch_size=BATCH_SIZE,
 	          epochs=CNN_EPOCHS,
-	          verbose=2,
+	          verbose=1,
 	          validation_split=VALIDATION_SPLIT,
 	          callbacks=callbacks)
 
@@ -57,6 +57,7 @@ clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balan
 clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
 print(y_pred_b)
+print(label_test)
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
