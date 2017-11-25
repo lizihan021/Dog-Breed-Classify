@@ -8,7 +8,13 @@ from keras import backend as K
 from utils import *
 from dog import DogsDataset
 from os.path import exists
+import matplotlib.pyplot as plt
 import cv2
+from sklearn.svm import SVC, LinearSVC
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from sklearn import metrics
+from sklearn.preprocessing import label_binarize
+from sklearn.metrics import roc_curve, auc
 
 # Initialize global variables
 IMAGE_SIZE = get('image_dim')
@@ -89,22 +95,26 @@ score = model.evaluate(x_test, features_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
-def get_sift(img, kp = [], mode = "gray"):
+def get_sift(img, kp = [], mode = "gray", mask = None):
+	img = denormalize_image(img)
+	img = np.array(img*255, dtype="uint8")
 	if mode == "gray":
-		img = denormalize_image(img)
-		img = np.array(img*255, dtype="uint8")
 		gray= cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 		sift = cv2.xfeatures2d.SIFT_create()
-		print(kp)
 		kp,des = sift.compute(gray,kp)
-		print(des.shape)
-		print(des)
-		img=cv2.drawKeypoints(gray,kp, None)
-		cv2.imshow('result', img), cv2.waitKey(0)
-		cv2.destroyWindow("result")
-
+		return des.flatten()
+		# img=cv2.drawKeypoints(gray,kp, None)
+		# cv2.imshow('result', img), cv2.waitKey(0)
+		# cv2.destroyWindow("result")
 	elif mode == "color":
-		return 1
+		# image chnnel mask
+		hist1 = cv2.calcHist([img],[0],mask,[256],[0,256]).T[0]
+		hist2 = cv2.calcHist([img],[1],mask,[256],[0,256]).T[0]
+		hist3 = cv2.calcHist([img],[2],mask,[256],[0,256]).T[0]
+		# plt.hist(gray_img.ravel(),256,[0,256])
+		# plt.title('Histogram for gray scale picture')
+		# plt.show()
+		return np.append(np.append(hist1, hist2), hist3)
 
 def generate_kp(features_line):
 	kp = []
@@ -112,10 +122,24 @@ def generate_kp(features_line):
 		tmp_x = int(features_line[2*i])
 		tmp_y = int(features_line[2*i+1])
 		kp.append( cv2.KeyPoint(tmp_x, tmp_y, 16) ) ###
-	return kp
+	return kp, None
 
-get_sift(x_train[2], generate_kp(features_train[2]))
+def get_new_feature(X, feature):
+	new_features = []
+	for x_row, f_row in zip(X, feature):
+		kp, mask = generate_kp(f_row)
+		sift_vec = get_sift(x_row, kp = kp)
+		hist_vec = get_sift(x_row, mode = "color", mask = mask)
+		# concatnate them to be the new feature.
+		new_features.append( np.append(sift_vec, hist_vec) )
+	return new_features
 
-visualize_feature_points(x_train[2], features_train[2], normalized=True)
+new_features_train = get_new_feature(x_train, features_train)
+new_features_test = get_new_feature(x_test, features_test)
+
+clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
+clf.fit(new_features_train, label_train)
+y_pred_b = clf.predict(new_features_test)
+#visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
