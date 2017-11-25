@@ -119,10 +119,29 @@ def get_sift(img, kp = [], mode = "gray", mask = None):
 def generate_kp(features_line):
 	kp = []
 	for i in range(int(len(features_line)/2)):
-		tmp_x = int(features_line[2*i])
-		tmp_y = int(features_line[2*i+1])
-		kp.append( cv2.KeyPoint(tmp_x, tmp_y, 16) ) ###
-	return kp, None
+		left_eye = np.array([features_line[0], features_line[1]])
+		right_eye = np.array([features_line[2], features_line[3]])
+		nose = np.array([features_line[4], features_line[5]])
+		face_line = left_eye - right_eye
+		kp_scale = np.linalg.norm(face_line)/2
+		kp_angle = np.degrees(np.arctan2(face_line[1], face_line[0]))
+		for i in range(8):
+			tmp_x = features_line[2*i]
+			tmp_y = features_line[2*i+1]
+			kp.append(cv2.KeyPoint(tmp_x, tmp_y, _size=kp_scale, _angle=kp_angle))
+
+		# mask
+		center = (left_eye + right_eye + nose)/3
+		face_scale = np.linalg.norm(face_line)*1.5
+		mask = np.zeros((128,128), dtype="uint8")
+
+		col_min = np.maximum(int(center[0]-face_scale), 0)
+		col_max = np.minimum(int(center[0]+face_scale), 127)
+		row_min = np.maximum(int(center[1]-face_scale), 0)
+		row_max = np.minimum(int(center[1]+face_scale), 127)
+
+		mask[row_min:row_max,col_min:col_max] = 1
+		return kp, mask
 
 def get_new_feature(X, feature):
 	new_features = []
@@ -136,6 +155,8 @@ def get_new_feature(X, feature):
 
 new_features_train = get_new_feature(x_train, features_train)
 new_features_test = get_new_feature(x_test, features_test)
+
+
 
 clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 clf.fit(new_features_train, label_train)
