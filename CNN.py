@@ -1,7 +1,6 @@
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Input, Conv2D, Dense, Dropout, MaxPooling2D, Flatten
-from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
 from keras.utils import plot_model
 from keras import backend as K
