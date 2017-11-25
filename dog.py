@@ -34,7 +34,7 @@ class DogsDataset:
         point_location_vector = []
         lines = open(path).read().splitlines()
 
-        for line in lines[:10]:
+        for line in lines[:10]+lines[300:310]:
             image = imread(os.path.join(get('image_path'), line))
             row, col, _ = image.shape
             image = imresize(image,(get('image_dim'), get('image_dim')))
@@ -56,7 +56,7 @@ class DogsDataset:
             point_location_vector.append(one_feature)
 
             # dog class #
-            y.append(re.split('.', re.split('/', line)[0])[0])
+            y.append(int(line.split(".")[0]))
 
         X = self._normalize(np.array(X), partition)
         # example of visualization
