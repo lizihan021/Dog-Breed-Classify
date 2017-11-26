@@ -1,7 +1,6 @@
 import numpy as np
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
-from utils import *
 from dog import DogsDataset
 from os.path import exists
 import matplotlib.pyplot as plt
@@ -10,6 +9,7 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn import metrics
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc
+from utils import *
 from sift_feature import *
 from cnn import *
 
@@ -55,9 +55,8 @@ new_features_train = get_new_feature(x_train, features_train)
 new_features_test = get_new_feature(x_test, features_test)
 
 # svm classify
-print("SVM training ...")
-clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
-print(new_features_train, label_train)
+print("svm training ...")
+clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
 
