@@ -15,9 +15,9 @@ def get_sift(img, kp = [], mode = "gray", mask = None):
 		# cv2.destroyWindow("result")
 	elif mode == "color":
 		# image chnnel mask
-		hist1 = cv2.calcHist([img],[0],mask,[256],[0,256]).T[0]
-		hist2 = cv2.calcHist([img],[1],mask,[256],[0,256]).T[0]
-		hist3 = cv2.calcHist([img],[2],mask,[256],[0,256]).T[0]
+		hist1 = cv2.calcHist([img],[0],mask,[32],[0,256]).T[0]
+		hist2 = cv2.calcHist([img],[1],mask,[32],[0,256]).T[0]
+		hist3 = cv2.calcHist([img],[2],mask,[32],[0,256]).T[0]
 		# plt.hist(gray_img.ravel(),256,[0,256])
 		# plt.title('Histogram for gray scale picture')
 		# plt.show()

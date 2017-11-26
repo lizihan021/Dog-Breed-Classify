@@ -34,7 +34,7 @@ class DogsDataset:
         point_location_vector = []
         lines = open(path).read().splitlines()
 
-        for line in lines[30:60]:
+        for line in lines[0:200]:
             image = imread(os.path.join(get('image_path'), line))
             row, col, _ = image.shape
             image = imresize(image,(get('image_dim'), get('image_dim')))
