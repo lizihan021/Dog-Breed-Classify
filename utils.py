@@ -40,7 +40,6 @@ def denormalize_image(image):
     return (image - np.min(image, axis=(0,1))) / ptp
 
 
-
 # if __name__ == '__main__':
 #     image_name = "CU_Dogs/dogImages/006.American_eskimo_dog/American_eskimo_dog_00394.jpg"
 #     features = np.array([231,77,273,76,249,103,201,3,229,36,253,32,279,32,299,1])

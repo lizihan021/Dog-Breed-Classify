@@ -16,8 +16,8 @@ class DogsDataset:
     def __init__(self):
         # Load in all the data we need from disk
 
-        self.train_path = get('testing_file')
-        self.test_path = get('training_file')
+        self.train_path = get('training_file')
+        self.test_path = get('testing_file')
         self.trainX, self.trainY, self.train_features = self._load_data('train')
         self.testX, self.testY, self.test_features = self._load_data('test')
 

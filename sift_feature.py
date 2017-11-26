@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from utils import *
+import matplotlib.pyplot as plt
 
 def get_sift(img, kp = [], mode = "gray", mask = None):
 	img = denormalize_image(img)
@@ -59,3 +60,37 @@ def get_new_feature(X, feature):
 		# concatnate them to be the new feature.
 		new_features.append( np.append(sift_vec, hist_vec) )
 	return new_features
+
+def visualize_face(image, feature):
+	"""
+	Visualize face of dog.
+	Input: image - a single image. e.g. x_train[0]
+	       feature - feature points for a single data entry.
+	                 e.g. features_train[0]
+	"""
+	_image = [image]
+	_feature = [feature]
+	for x_row, f_row in zip(_image, _feature):
+		kp, mask = generate_kp(f_row)
+	left_top = [-1, -1]
+	right_bottom = [-1, -1]
+	for r in range(len(mask)):
+		for c in range(len(mask[r])):
+			if mask[r][c] == 1 and left_top == [-1, -1]:
+				left_top = [r, c]
+			elif mask[r][c] == 0 and left_top != [-1, -1]:
+				right_bottom = [-1, c]
+				break
+		if right_bottom != [-1, -1]:
+			break
+	for r in range(len(mask)):
+		if mask[r][left_top[1]] == 0 and r > left_top[0]:
+			right_bottom[0] = r
+			break
+	image_found = cv2.rectangle(denormalize_image(image), (left_top[1], left_top[0]),
+				  (right_bottom[1], right_bottom[0]), (0, 0, 100), 1)
+	plt.imshow(image_found)
+	plt.show()
+
+
+

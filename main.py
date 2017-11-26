@@ -55,15 +55,11 @@ new_features_train = get_new_feature(x_train, features_train)
 new_features_test = get_new_feature(x_test, features_test_ground_truth)
 
 # svm classify
-<<<<<<< HEAD
 print("svm training ...")
-clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
-=======
-print("SVM training ...")
+# clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 #clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
 print(new_features_train, label_train)
->>>>>>> d9b0b3c7d53ecfa010e33744212f3ed46acc41ec
 clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
 
@@ -73,7 +69,9 @@ true_num = 0
 for i, pred in enumerate(y_pred_b):
 	if label_test[i] == pred:
 		true_num += 1
-print("final acc:", true_num/len(y_pred_b))
+print("final acc:", float(true_num)/len(y_pred_b))
+for i in range(5):
+	visualize_face(x_train[i], features_train[i])
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
