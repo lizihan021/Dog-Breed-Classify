@@ -29,6 +29,7 @@ x_train, label_train, features_train = dogs.trainX, dogs.trainY, dogs.train_feat
 x_test, lable_test, features_test_ground_truth = dogs.testX, dogs.testY, dogs.test_features
 
 if not exists(MODEL_WEIGHTS_FILE):
+	print("training ...")
 	callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
 	history = model.fit(x_train, features_train,
 	          batch_size=BATCH_SIZE,
@@ -40,24 +41,33 @@ if not exists(MODEL_WEIGHTS_FILE):
 	max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
 	print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 
+print("testing cnn performance ...")
 model.load_weights(MODEL_WEIGHTS_FILE)
 score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
 print('Test loss:', score[0], 'Test accuracy:', score[1])
 
+print("CNN predicting ...")
 features_test = model.predict(x_test, batch_size=BATCH_SIZE)
 
 # get sift feature
+print("getting sift feature ...")
 new_features_train = get_new_feature(x_train, features_train)
 new_features_test = get_new_feature(x_test, features_test)
 
-print(label_train)
-
 # svm classify
+print("SVM training ...")
 clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
+print(new_features_train, label_train)
 clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
+
 print(y_pred_b)
-print(label_test)
+print(lable_test)
+true_num = 0
+for i, pred in enumerate(y_pred_b):
+	if lable_test[i] == pred:
+		true_num += 1
+print("final acc:", true_num/len(y_pred_b))
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
