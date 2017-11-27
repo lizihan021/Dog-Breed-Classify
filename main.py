@@ -64,6 +64,7 @@ clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
 
 np.set_printoptions(edgeitems=30)
+print(y_pred_b)
 print(label_test)
 true_num = 0
 for i, pred in enumerate(y_pred_b):
