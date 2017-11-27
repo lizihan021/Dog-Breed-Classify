@@ -11,7 +11,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc
 from utils import *
 from sift_feature import *
-from CNN import *
+from cnn import *
 
 # Initialize global variables
 MODEL_WEIGHTS_FILE = get('cnn.weights_file')
@@ -52,18 +52,18 @@ features_test = model.predict(x_test, batch_size=BATCH_SIZE)
 # get sift feature
 print("getting sift feature ...")
 new_features_train = get_new_feature(x_train, features_train)
-new_features_test = get_new_feature(x_test, features_test_ground_truth)
+new_features_test = get_new_feature(x_test, features_test)
+# new_features_test = get_new_feature(x_test, features_test_ground_truth)
 
 # svm classify
 print("svm training ...")
 # clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
-#clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
+# clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
-print(new_features_train, label_train)
 clf.fit(new_features_train, label_train)
 y_pred_b = clf.predict(new_features_test)
 
-print(y_pred_b)
+np.set_printoptions(edgeitems=30)
 print(label_test)
 true_num = 0
 for i, pred in enumerate(y_pred_b):
@@ -71,7 +71,7 @@ for i, pred in enumerate(y_pred_b):
 		true_num += 1
 print("final acc:", float(true_num)/len(y_pred_b))
 for i in range(5):
-	visualize_face(x_train[i], features_train[i])
+	visualize_face(x_test[i], features_test[i])
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
