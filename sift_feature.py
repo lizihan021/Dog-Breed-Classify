@@ -90,6 +90,7 @@ def visualize_face(image, feature):
 	image_found = cv2.rectangle(denormalize_image(image), (left_top[1], left_top[0]),
 				  (right_bottom[1], right_bottom[0]), (0, 0, 100), 1)
 	plt.imshow(image_found)
+	plt.scatter(x=feature[::2], y=feature[1::2], c='r', s=60)
 	plt.show()
 
 
