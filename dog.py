@@ -10,6 +10,7 @@ from scipy.misc import imread, imresize
 import os
 from utils import get
 import re
+import random
 
 class DogsDataset:
 
@@ -33,6 +34,9 @@ class DogsDataset:
         X, y = [], []
         point_location_vector = []
         lines = open(path).read().splitlines()
+
+        if partition == "train":
+            random.shuffle(lines)
 
         for line in lines:
             image = imread(os.path.join(get('image_path'), line))

@@ -13,6 +13,7 @@ from utils import *
 from sift_feature import *
 from cnn import *
 
+
 # Initialize global variables
 MODEL_WEIGHTS_FILE = get('cnn.weights_file')
 VALIDATION_SPLIT = get('cnn.validation_split')
@@ -41,19 +42,24 @@ if not exists(MODEL_WEIGHTS_FILE):
 	max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
 	print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 
-print("testing cnn performance ...")
+print("loading cnn weight ...")
 model.load_weights(MODEL_WEIGHTS_FILE)
+
+print("testing cnn performance ...")
 score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
 print('Test loss:', score[0], 'Test accuracy:', score[1])
 
 print("CNN predicting ...")
 features_test = model.predict(x_test, batch_size=BATCH_SIZE)
 
+for i in range(10):
+	visualize_face(x_test[i], features_test[i])
+
 # get sift feature
 print("getting sift feature ...")
 new_features_train = get_new_feature(x_train, features_train)
 new_features_test = get_new_feature(x_test, features_test)
-# new_features_test = get_new_feature(x_test, features_test_ground_truth)
+# new_features_test = get_new_feature(x_test, features_test_ground_truth) # used to test svm
 
 # svm classify
 print("svm training ...")
@@ -71,8 +77,7 @@ for i, pred in enumerate(y_pred_b):
 	if label_test[i] == pred:
 		true_num += 1
 print("final acc:", float(true_num)/len(y_pred_b))
-for i in range(5):
-	visualize_face(x_test[i], features_test[i])
+
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)
