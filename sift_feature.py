@@ -31,7 +31,7 @@ def generate_kp(features_line):
 		right_eye = np.array([features_line[2], features_line[3]])
 		nose = np.array([features_line[4], features_line[5]])
 		face_line = left_eye - right_eye
-		kp_scale = np.linalg.norm(face_line)/2
+		kp_scale = np.linalg.norm(face_line)/4
 		kp_angle = np.degrees(np.arctan2(face_line[1], face_line[0]))
 		for i in range(8):
 			tmp_x = features_line[2*i]
@@ -40,7 +40,7 @@ def generate_kp(features_line):
 
 		# mask
 		center = (left_eye + right_eye + nose)/3
-		face_scale = np.linalg.norm(face_line)*1.5
+		face_scale = np.linalg.norm(face_line)/3
 		mask = np.zeros((128,128), dtype="uint8")
 
 		col_min = np.maximum(int(center[0]-face_scale), 0)
