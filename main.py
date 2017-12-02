@@ -9,6 +9,8 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn import metrics
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc
+import optunity
+import optunity.metrics
 from utils import *
 from sift_feature import *
 from cnn import *
@@ -63,11 +65,22 @@ new_features_test = get_new_feature(x_test, features_test)
 
 # svm classify
 print("svm training ...")
+# score function: twice iterated 10-fold cross-validated accuracy
+@optunity.cross_validated(x=new_features_train, y=label_train, num_folds=10, num_iter=2)
+def svm_auc(x_train, y_train, x_test, y_test, logC, logGamma):
+    model = sklearn.svm.SVC(C=10 ** logC, gamma=10 ** logGamma).fit(x_train, y_train)
+    decision_values = model.decision_function(x_test)
+    return optunity.metrics.roc_auc(y_test, decision_values)
+
+# perform tuning
+hps, _, _ = optunity.maximize(svm_auc, num_evals=200, logC=[-5, 2], logGamma=[-5, 1])
+optimal_model = SVC(C=10 ** hps['logC'], gamma=10 ** hps['logGamma']).fit(new_features_train, label_train)
 # clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 # clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
-clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
-clf.fit(new_features_train, label_train)
-y_pred_b = clf.predict(new_features_test)
+# clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
+# clf.fit(new_features_train, label_train)
+
+y_pred_b = optimal_model.predict(new_features_test)
 
 np.set_printoptions(edgeitems=30)
 print(y_pred_b)
