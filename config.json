@@ -10,6 +10,7 @@
     	"batch_size": 180,
     	"optimizer": "adam",
         "weights_file": "weights/cnn_weights.h5",
+        "weights_file_comp": "weights/cnn_weights_comp.h5",
         "validation_split": 0.2,
         "cnn_epochs": 800,
     },
