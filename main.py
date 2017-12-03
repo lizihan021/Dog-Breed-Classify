@@ -54,8 +54,8 @@ print('Test loss:', score[0], 'Test accuracy:', score[1])
 print("CNN predicting ...")
 features_test = model.predict(x_test, batch_size=BATCH_SIZE)
 
-for i in range(10):
-	visualize_face(x_test[i], features_test[i])
+# for i in range(10):
+# 	visualize_face(x_test[i], features_test[i])
 
 # get sift feature
 print("getting sift feature ...")
@@ -66,15 +66,26 @@ new_features_test = get_new_feature(x_test, features_test)
 # svm classify
 print("svm training ...")
 # score function: twice iterated 10-fold cross-validated accuracy
-@optunity.cross_validated(x=new_features_train, y=label_train, num_folds=10, num_iter=2)
-def svm_auc(x_train, y_train, x_test, y_test, logC, logGamma):
-    model = sklearn.svm.SVC(C=10 ** logC, gamma=10 ** logGamma).fit(x_train, y_train)
-    decision_values = model.decision_function(x_test)
-    return optunity.metrics.roc_auc(y_test, decision_values)
+# @optunity.cross_validated(x=new_features_train, y=label_train, num_folds=5, num_iter=1)
+# # def svm_acc(x_train, y_train, x_test, y_test, logC, logGamma):
+# def svm_acc(x_train, y_train, x_test, y_test, logC):
+# 	# model = SVC(C=10 ** logC, gamma=10 ** logGamma).fit(x_train, y_train)
+# 	model = SVC(C=10 ** logC, kernel='linear', class_weight='balanced').fit(x_train, y_train)
+# 	y_pred_b = model.predict(x_test)
+# 	true_num = 0
+# 	for i, pred in enumerate(y_pred_b):
+# 		if y_test[i] == pred:
+# 			true_num += 1
+# 	acc = float(true_num)/len(y_pred_b)
+# 	print(logC,  acc)
+# 	return acc
 
-# perform tuning
-hps, _, _ = optunity.maximize(svm_auc, num_evals=200, logC=[-5, 2], logGamma=[-5, 1])
-optimal_model = SVC(C=10 ** hps['logC'], gamma=10 ** hps['logGamma']).fit(new_features_train, label_train)
+# # perform tuning
+# # hps, _, _ = optunity.maximize(svm_acc, num_evals=200, logC=[-5, 2], logGamma=[-5, 1])
+# hps, _, _ = optunity.maximize(svm_acc, num_evals=50, logC=[-5, 2])
+# optimal_model = SVC(C=10 ** hps['logC'], gamma=10 ** hps['logGamma']).fit(new_features_train, label_train)
+optimal_model = SVC(C=1, kernel='linear', class_weight='balanced').fit(new_features_train, label_train)
+
 # clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 # clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
 # clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
