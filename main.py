@@ -11,9 +11,12 @@ from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc
 import optunity
 import optunity.metrics
+import pickle
+import sys
 from utils import *
 from sift_feature import *
 from cnn import *
+from svm import *
 
 
 # Initialize global variables
@@ -21,87 +24,79 @@ MODEL_WEIGHTS_FILE = get('cnn.weights_file')
 VALIDATION_SPLIT = get('cnn.validation_split')
 BATCH_SIZE = get('cnn.batch_size')
 CNN_EPOCHS = get('cnn.cnn_epochs')
+np.set_printoptions(edgeitems=30)
 
-# get cnn model
-model = generate_model()
+if not (len(sys.argv)>1 and sys.argv[1] == "svm"):
+	# get cnn model
+	model = generate_model()
 
-# define input data:
-dogs = DogsDataset()
-x_train, label_train, features_train = dogs.trainX, dogs.trainY, dogs.train_features
-# actually for test we don't know feature test.
-x_test, label_test, features_test_ground_truth = dogs.testX, dogs.testY, dogs.test_features
+	# define input data:
+	dogs = DogsDataset()
+	x_train, label_train, features_train = dogs.trainX, dogs.trainY, dogs.train_features
+	# actually for test we don't know feature test.
+	x_test, label_test, features_test_ground_truth = dogs.testX, dogs.testY, dogs.test_features
 
-if not exists(MODEL_WEIGHTS_FILE):
-	print("training ...")
-	callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
-	history = model.fit(x_train, features_train,
-	          batch_size=BATCH_SIZE,
-	          epochs=CNN_EPOCHS,
-	          verbose=1,
-	          validation_split=VALIDATION_SPLIT,
-	          callbacks=callbacks)
+	if not exists(MODEL_WEIGHTS_FILE) or (len(sys.argv)>1 and sys.argv[1] == "train"):
+		if len(sys.argv)>1 and sys.argv[1] == "train":
+			model.load_weights(MODEL_WEIGHTS_FILE)
+		print("training ...")
+		callbacks = [ModelCheckpoint(MODEL_WEIGHTS_FILE, monitor='val_loss', save_best_only=True)]
+		history = model.fit(x_train, features_train,
+		          batch_size=BATCH_SIZE,
+		          epochs=CNN_EPOCHS,
+		          verbose=1,
+		          validation_split=VALIDATION_SPLIT,
+		          callbacks=callbacks)
 
-	max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
-	print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
+		max_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
+		print('Min validation loss = {0:.4f} (epoch {1:d})'.format(max_val_loss, idx+1))
 
-print("loading cnn weight ...")
-model.load_weights(MODEL_WEIGHTS_FILE)
+	print("loading cnn weight ...")
+	model.load_weights(MODEL_WEIGHTS_FILE)
 
-print("testing cnn performance ...")
-score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
-print('Test loss:', score[0], 'Test accuracy:', score[1])
+	print("testing cnn performance ...")
+	score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
+	print('Test loss:', score[0], 'Test accuracy:', score[1])
 
-print("CNN predicting ...")
-features_test = model.predict(x_test, batch_size=BATCH_SIZE)
+	print("CNN predicting ...")
+	features_test = model.predict(x_test, batch_size=BATCH_SIZE)
 
-# for i in range(10):
-# 	visualize_face(x_test[i], features_test[i])
+	# for i in range(10):
+	# 	visualize_face(x_test[i], features_test[i])
 
-# get sift feature
-print("getting sift feature ...")
-new_features_train = get_new_feature(x_train, features_train)
-new_features_test = get_new_feature(x_test, features_test)
-# new_features_test = get_new_feature(x_test, features_test_ground_truth) # used to test svm
+	# get sift feature
+	print("getting sift feature ...")
+	new_features_train = get_new_feature(x_train, features_train)
+	# new_features_test = get_new_feature(x_test, features_test)
+	new_features_test = get_new_feature(x_test, features_test_ground_truth) # used to test svm
 
+	pickle.dump( {"a":new_features_train,"b":label_train,"c":new_features_test,"d":label_test}, open( "save.p", "wb" ) )
 # svm classify
 print("svm training ...")
-# score function: twice iterated 10-fold cross-validated accuracy
-# @optunity.cross_validated(x=new_features_train, y=label_train, num_folds=5, num_iter=1)
-# # def svm_acc(x_train, y_train, x_test, y_test, logC, logGamma):
-# def svm_acc(x_train, y_train, x_test, y_test, logC):
-# 	# model = SVC(C=10 ** logC, gamma=10 ** logGamma).fit(x_train, y_train)
-# 	model = SVC(C=10 ** logC, kernel='linear', class_weight='balanced').fit(x_train, y_train)
-# 	y_pred_b = model.predict(x_test)
-# 	true_num = 0
-# 	for i, pred in enumerate(y_pred_b):
-# 		if y_test[i] == pred:
-# 			true_num += 1
-# 	acc = float(true_num)/len(y_pred_b)
-# 	print(logC,  acc)
-# 	return acc
 
-# # perform tuning
-# # hps, _, _ = optunity.maximize(svm_acc, num_evals=200, logC=[-5, 2], logGamma=[-5, 1])
-# hps, _, _ = optunity.maximize(svm_acc, num_evals=50, logC=[-5, 2])
-# optimal_model = SVC(C=10 ** hps['logC'], gamma=10 ** hps['logGamma']).fit(new_features_train, label_train)
-optimal_model = SVC(C=1, kernel='linear', class_weight='balanced').fit(new_features_train, label_train)
-
+temp_p = pickle.load( open( "save.p", "rb" ) )
+new_features_train,label_train,new_features_test,label_test = temp_p["a"],temp_p["b"],temp_p["c"],temp_p["d"]
 # clf = SVC(kernel='linear',decision_function_shape="ovr", C=1.0, class_weight="balanced")
-# clf = SVC(kernel='rbf',decision_function_shape="ovr", C=1.0, class_weight="balanced")
+# clf = SVC(C=1.0, gamma=1e-8, class_weight="balanced").fit(new_features_train, label_train)
 # clf = SVC(C=1.0, kernel='linear', class_weight='balanced')
 # clf.fit(new_features_train, label_train)
 
-y_pred_b = optimal_model.predict(new_features_test)
-
-np.set_printoptions(edgeitems=30)
-print(y_pred_b)
 print(label_test)
-true_num = 0
-for i, pred in enumerate(y_pred_b):
-	if label_test[i] == pred:
-		true_num += 1
-print("final acc:", float(true_num)/len(y_pred_b))
+for c in [1, 0.01,100]:
+	optimal_model = SVC(C=c, kernel='linear', class_weight='balanced').fit(new_features_train, label_train)
+	y_pred_b = optimal_model.predict(new_features_test)
 
+	print(y_pred_b)
+	print(c)
+	print("final acc:", get_svm_acc(y_pred_b, label_test))
+
+# for gam in [1e-7]:
+# 	for c in [5, 10, 50, 100, 200]:
+# 		clf = SVC(C=c, gamma=gam, class_weight="balanced").fit(new_features_train, label_train)
+# 		y_pred_b = clf.predict(new_features_test)
+# 		print(y_pred_b)
+# 		print(c, gam)
+# 		print("final acc:", get_svm_acc(y_pred_b, label_test))
 #visualize_feature_points(x_train[2], features_train[2], normalized=True)
 
 exit(0)

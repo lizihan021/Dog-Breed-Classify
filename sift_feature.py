@@ -57,6 +57,9 @@ def get_new_feature(X, feature):
 		kp, mask = generate_kp(f_row)
 		sift_vec = get_sift(x_row, kp = kp)
 		hist_vec = get_sift(x_row, mode = "color", mask = mask)
+		
+		# sift_vec = sift_vec/np.sum(sift_vec)*5
+		hist_vec = hist_vec/np.sum(hist_vec)
 		# concatnate them to be the new feature.
 		new_features.append( np.append(sift_vec, hist_vec) )
 	return new_features
