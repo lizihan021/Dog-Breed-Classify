@@ -54,9 +54,9 @@ if not (len(sys.argv)>1 and sys.argv[1] == "svm"):
 	print("loading cnn weight ...")
 	model.load_weights(MODEL_WEIGHTS_FILE)
 
-	print("testing cnn performance ...")
-	score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
-	print('Test loss:', score[0], 'Test accuracy:', score[1])
+	# print("testing cnn performance ...")
+	# score = model.evaluate(x_test, features_test_ground_truth, batch_size=BATCH_SIZE, verbose=0)
+	# print('Test loss:', score[0], 'Test accuracy:', score[1])
 
 	print("CNN predicting ...")
 	features_test = model.predict(x_test, batch_size=BATCH_SIZE)
@@ -67,8 +67,8 @@ if not (len(sys.argv)>1 and sys.argv[1] == "svm"):
 	# get sift feature
 	print("getting sift feature ...")
 	new_features_train = get_new_feature(x_train, features_train)
-	# new_features_test = get_new_feature(x_test, features_test)
-	new_features_test = get_new_feature(x_test, features_test_ground_truth) # used to test svm
+	new_features_test = get_new_feature(x_test, features_test)
+	# new_features_test = get_new_feature(x_test, features_test_ground_truth) # used to test svm
 
 	pickle.dump( {"a":new_features_train,"b":label_train,"c":new_features_test,"d":label_test}, open( "save.p", "wb" ) )
 # svm classify
@@ -82,13 +82,11 @@ new_features_train,label_train,new_features_test,label_test = temp_p["a"],temp_p
 # clf.fit(new_features_train, label_train)
 
 print(label_test)
-for c in [1, 0.01,100]:
-	optimal_model = SVC(C=c, kernel='linear', class_weight='balanced').fit(new_features_train, label_train)
-	y_pred_b = optimal_model.predict(new_features_test)
+optimal_model = SVC(C=1, kernel='linear', class_weight='balanced').fit(new_features_train, label_train)
+y_pred_b = optimal_model.predict(new_features_test)
 
-	print(y_pred_b)
-	print(c)
-	print("final acc:", get_svm_acc(y_pred_b, label_test))
+print(y_pred_b)
+print("final acc:", get_svm_acc(y_pred_b, label_test))
 
 # for gam in [1e-7]:
 # 	for c in [5, 10, 50, 100, 200]:
@@ -97,6 +95,12 @@ for c in [1, 0.01,100]:
 # 		print(y_pred_b)
 # 		print(c, gam)
 # 		print("final acc:", get_svm_acc(y_pred_b, label_test))
-#visualize_feature_points(x_train[2], features_train[2], normalized=True)
+for i in range(13):
+	plt.subplot(1,2,1)
+	visualize_feature_points(x_test[i], features_test[i], normalized=True)
+	plt.subplot(1,2,2)
+	visualize_feature_points(x_train[list(label_train).index(y_pred_b[i])], normalized=True)
+	plt.title(":" + list(label_train).index(y_pred_b[i]))
+	plt.show()
 
 exit(0)

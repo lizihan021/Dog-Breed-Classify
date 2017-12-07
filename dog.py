@@ -37,6 +37,8 @@ class DogsDataset:
 
         if partition == "train":
             random.shuffle(lines)
+        else:
+            line = lines
 
         for line in lines:
             image = imread(os.path.join(get('image_path'), line))

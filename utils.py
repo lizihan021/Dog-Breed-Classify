@@ -20,7 +20,7 @@ def get(attr):
         node = node[part]
     return node
 
-def visualize_feature_points(image, features, normalized = False):
+def visualize_feature_points(image, features = [], normalized = False):
     """
     Plot feature points on the image, including
     Right eye, Left eye, Nose, Right ear tip, Right ear base (inner base),
@@ -31,8 +31,9 @@ def visualize_feature_points(image, features, normalized = False):
         implot = plt.imshow(denormalize_image(image))
     else:
         implot = plt.imshow(image)
-    plt.scatter(x=features[::2], y=features[1::2], c='r', s=100)
-    plt.show()
+    if len(features) != 0:
+        plt.scatter(x=features[::2], y=features[1::2], c='b', s=10)
+    # plt.show()
 
 def denormalize_image(image):
     """ Rescale the image's color space from (min, max) to (0, 1) """
